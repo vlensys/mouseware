@@ -19,6 +19,8 @@ public class MacroConfig {
     public static int striderThreshold = 27;
     public static boolean superCraftOnFullInventory = false;
     public static boolean toggleMacro = false;
+    public static int superCraftGuiDelay = 500;
+    public static int superCraftClickDelay = 100;
     public static boolean debug = false;
 
     public static int menuKey  = GLFW.GLFW_KEY_O;
@@ -39,6 +41,8 @@ public class MacroConfig {
         int striderThreshold = 27;
         boolean superCraftOnFullInventory = false;
         boolean toggleMacro = false;
+        int superCraftGuiDelay = 500;
+        int superCraftClickDelay = 100;
         boolean debug = false;
         int menuKey  = GLFW.GLFW_KEY_J;
         int macroKey = GLFW.GLFW_KEY_H;
@@ -61,6 +65,8 @@ public class MacroConfig {
                 striderThreshold     = Math.max(1, Math.min(200, d.striderThreshold));
                 superCraftOnFullInventory = d.superCraftOnFullInventory;
                 toggleMacro          = d.toggleMacro;
+                superCraftGuiDelay = d.superCraftGuiDelay;
+                superCraftClickDelay = d.superCraftClickDelay;
                 debug                = d.debug;
                 menuKey              = d.menuKey;
                 macroKey             = d.macroKey;
@@ -82,6 +88,8 @@ public class MacroConfig {
             d.striderThreshold      = striderThreshold;
             d.superCraftOnFullInventory = superCraftOnFullInventory;
             d.toggleMacro           = toggleMacro;
+            d.superCraftGuiDelay    = superCraftGuiDelay;
+            d.superCraftClickDelay  = superCraftClickDelay;
             d.debug                 = debug;
             d.menuKey               = menuKey;
             d.macroKey              = macroKey;

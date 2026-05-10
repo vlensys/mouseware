@@ -4,6 +4,7 @@ import com.mouseware.mod.MacroConfig;
 import com.mouseware.mod.MacroWorkerThread;
 import com.mouseware.mod.MousewareClient;
 import com.mouseware.mod.util.ChatUtils;
+import com.mouseware.mod.util.TimeUtils;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
@@ -21,9 +22,6 @@ public class SuperCrafting {
     private static int craftingStage = 0;
     private static long lastActionTime = 0;
     private static long guiOpenedAtMs = 0;
-
-    private static final long ACTION_DELAY_MS = 200;
-    private static final long GUI_OPEN_DELAY_MS = 250;
 
     private static List<String> getitems() {
         return MacroConfig.superCraftItems;
@@ -83,7 +81,7 @@ public class SuperCrafting {
         if (!isCrafting) return;
 
         long now = System.currentTimeMillis();
-        if (now - lastActionTime < ACTION_DELAY_MS) return;
+        if (now - lastActionTime < MacroConfig.superCraftClickDelay) return;
 
         List<String> items = getitems();
         if (items.isEmpty()) {
@@ -102,7 +100,7 @@ public class SuperCrafting {
         }
 
         if (guiOpenedAtMs == 0) guiOpenedAtMs = now;
-        if (now - guiOpenedAtMs < GUI_OPEN_DELAY_MS) return;
+        if (now - guiOpenedAtMs < MacroConfig.superCraftGuiDelay) return;
 
         if (screen.getMenu().slots.size() < 11) {
             ChatUtils.debug(client, "SuperCrafting: GUI not fully loaded.");
@@ -143,10 +141,13 @@ public class SuperCrafting {
                     ChatUtils.print(client, "SuperCrafting: All done!");
                     isCrafting = false;
                     isCraftingDone = true;
-                    if (toggleMacroForRun) {
-                        simulateKeyPress(MousewareClient.getToggleMacroKey());
-                        toggleMacroForRun = false;
-                    }
+                    TimeUtils.run(() -> {
+                        if (toggleMacroForRun) {
+                            TimeUtils.sleep(750);
+                            simulateKeyPress(MousewareClient.getToggleMacroKey());
+                            toggleMacroForRun = false;
+                        }
+                    });
                 } else {
                     MacroWorkerThread.getInstance().submit("SuperCrafting-Next", () -> {
                         MacroWorkerThread.sleep(600);

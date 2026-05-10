@@ -17,7 +17,7 @@ import java.util.List;
 public class ClickGui extends Screen {
 
     private static final int PANEL_W  = 220;
-    private static final int PANEL_H  = 231;
+    private static final int PANEL_H  = 275; // was 231, +44 for two new sliders
 
     private static final int TOGGLE_W = 40;
     private static final int TOGGLE_H = 14;
@@ -31,13 +31,24 @@ public class ClickGui extends Screen {
     private static final int SWAP_DELAY_MIN = 0;
     private static final int SWAP_DELAY_MAX = 150;
 
+    private static final int GUI_DELAY_MIN   = 0;
+    private static final int GUI_DELAY_MAX   = 2000;
+
+    private static final int CLICK_DELAY_MIN = 0;
+    private static final int CLICK_DELAY_MAX = 1500;
+
     private int panelX, panelY;
     private int currentY;
 
-    private boolean draggingSlider  = false;
-    private boolean draggingSlider2 = false;
+    private boolean draggingSlider      = false;
+    private boolean draggingSlider2     = false;
+    private boolean draggingGuiDelay    = false;
+    private boolean draggingClickDelay  = false;
+
     private int sliderY;
     private int sliderY2;
+    private int sliderGuiDelayY;
+    private int sliderClickDelayY;
     private int debugY;
     private int listRowY; // supercraft items row Y
     private int superCraftOnFullY;
@@ -86,6 +97,14 @@ public class ClickGui extends Screen {
                     draggingSlider = true;
                     updateThresholdFromMouse(mx);
                 }
+                if (hitSlider(mx, my, sliderGuiDelayY)) {
+                    draggingGuiDelay = true;
+                    updateGuiDelayFromMouse(mx);
+                }
+                if (hitSlider(mx, my, sliderClickDelayY)) {
+                    draggingClickDelay = true;
+                    updateClickDelayFromMouse(mx);
+                }
 
                 // Supercraft items list row
                 if (hitListRow(mx, my)) {
@@ -102,9 +121,11 @@ public class ClickGui extends Screen {
 
         ScreenMouseEvents.allowMouseRelease(this).register((scr, event) -> {
             if (event.button() == 0) {
-                if (draggingSlider || draggingSlider2) {
-                    draggingSlider  = false;
-                    draggingSlider2 = false;
+                if (draggingSlider || draggingSlider2 || draggingGuiDelay || draggingClickDelay) {
+                    draggingSlider      = false;
+                    draggingSlider2     = false;
+                    draggingGuiDelay    = false;
+                    draggingClickDelay  = false;
                     MacroConfig.save();
                 }
             }
@@ -155,10 +176,24 @@ public class ClickGui extends Screen {
         MacroConfig.swapDelay = (int) Math.round(SWAP_DELAY_MIN + ratio * (SWAP_DELAY_MAX - SWAP_DELAY_MIN));
     }
 
+    private void updateGuiDelayFromMouse(double mx) {
+        int sx = panelX + PANEL_W - 10 - SLIDER_W;
+        double ratio = Math.max(0, Math.min(1, (mx - sx) / (double) SLIDER_W));
+        MacroConfig.superCraftGuiDelay = (int) Math.round(GUI_DELAY_MIN + ratio * (GUI_DELAY_MAX - GUI_DELAY_MIN));
+    }
+
+    private void updateClickDelayFromMouse(double mx) {
+        int sx = panelX + PANEL_W - 10 - SLIDER_W;
+        double ratio = Math.max(0, Math.min(1, (mx - sx) / (double) SLIDER_W));
+        MacroConfig.superCraftClickDelay = (int) Math.round(CLICK_DELAY_MIN + ratio * (CLICK_DELAY_MAX - CLICK_DELAY_MIN));
+    }
+
     public boolean mouseDragged(MouseButtonEvent event, double dx, double dy) {
         if (event.button() == 0) {
-            if (draggingSlider)  { updateThresholdFromMouse(event.x()); return true; }
-            if (draggingSlider2) { updateSwapDelayFromMouse(event.x()); return true; }
+            if (draggingSlider)      { updateThresholdFromMouse(event.x()); return true; }
+            if (draggingSlider2)     { updateSwapDelayFromMouse(event.x()); return true; }
+            if (draggingGuiDelay)    { updateGuiDelayFromMouse(event.x());  return true; }
+            if (draggingClickDelay)  { updateClickDelayFromMouse(event.x()); return true; }
         }
         return false;
     }
@@ -208,11 +243,21 @@ public class ClickGui extends Screen {
         renderRow(g, "  Toggle Macro", toggleMacroY, MacroConfig.toggleMacro);
         currentY += 22;
 
-        // 9. Divider
+        // 9. SC Gui Delay
+        sliderGuiDelayY = currentY;
+        renderSlider(g, "  SC Gui Delay", sliderGuiDelayY, MacroConfig.superCraftGuiDelay, GUI_DELAY_MIN, GUI_DELAY_MAX);
+        currentY += 22;
+
+        // 10. SC Click Delay
+        sliderClickDelayY = currentY;
+        renderSlider(g, "  SC Click Delay", sliderClickDelayY, MacroConfig.superCraftClickDelay, CLICK_DELAY_MIN, CLICK_DELAY_MAX);
+        currentY += 22;
+
+        // 11. Divider
         g.fill(panelX + 4, currentY, panelX + PANEL_W - 4, currentY + 1, 0x55FFFFFF);
         currentY += 6;
 
-        // 10. Debug
+        // 12. Debug
         debugY = currentY;
         renderRow(g, "Debug", debugY, MacroConfig.debug);
 
